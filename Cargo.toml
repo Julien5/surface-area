@@ -1,0 +1,15 @@
+[package]
+name = "surface-area"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+clap = { version = "4.5", features = ["derive"] }
+env_logger = "0.11.8"
+gdal = "0.19.0"
+geo = "0.32.0"
+geo-booleanop = "0.3.2"
+kml = "0.12.0"
+log = "0.4.29"
+proj4rs = "0.1.9"
+spade = "2.15.0"
