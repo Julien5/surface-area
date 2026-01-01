@@ -68,9 +68,14 @@ impl Polygon {
         );
         MercatorBoundingBox { min, max }
     }
+    pub fn projection(&self) -> String {
+        assert!(!self.wgs.is_empty());
+        let wgs0 = self.wgs.first().unwrap().clone();
+        wgs0.to_utm_proj4()
+    }
     pub fn mercator(&self) -> Vec<MercatorPoint> {
-        let projection = WebMercatorProjection::make();
-        self.wgs.iter().map(|w| projection.project(&w)).collect()
+        let proj = WebMercatorProjection::make(&self.projection());
+        self.wgs.iter().map(|w| proj.project(&w)).collect()
     }
     pub fn datasets(&self) -> BTreeSet<String> {
         return dataset::datasets(&self);
@@ -150,8 +155,8 @@ mod dataset {
             ret.insert(h.clone());
         }
 
-        let gl1 = "/home/julien/DEM/SRTM/GL1/S2/output_SRTMGL1.tif".to_string();
-        ret.insert(gl1);
+        ret.insert("/home/julien/DEM/SRTM/GL1/S1/output_SRTMGL1.tif".to_string());
+        ret.insert("/home/julien/DEM/SRTM/GL1/S2/output_SRTMGL1.tif".to_string());
         ret
     }
 }

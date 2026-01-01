@@ -92,6 +92,9 @@ impl Dataset {
         log::info!("dataset: height: {:.1}", self.mercatorbbox().height());
         log::info!("dataset: area: {:.1}", self.mercatorbbox().area());
     }
+    pub fn projection(&self) -> String {
+        return self.wgsbbox().center().to_utm_proj4();
+    }
     pub fn wgsbbox(&self) -> WGS84BoundingBox {
         let (width, height) = self.g.raster_size();
         let geo = self.g.geo_transform().unwrap();
@@ -144,7 +147,7 @@ impl Dataset {
         b.max = ret.max;
     }
     pub fn mercatorbbox(&self) -> MercatorBoundingBox {
-        let projection = WebMercatorProjection::make();
+        let projection = WebMercatorProjection::make(&self.projection());
         let wgs = self.wgsbbox();
         let min = projection.project(&wgs.min);
         let max = projection.project(&wgs.max);
@@ -230,7 +233,7 @@ impl Dataset {
         assert!(row_end < self.raster.ysize as isize);
         let col_end = col_end.min(self.raster.xsize as isize);
         let row_end = row_end.min(self.raster.ysize as isize);
-        let projection = WebMercatorProjection::make();
+        let projection = WebMercatorProjection::make(&self.projection());
         //log::info!("row: {row_start}..{row_end}");
         //log::info!("col: {col_start}..{col_end}");
 

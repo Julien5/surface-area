@@ -12,6 +12,19 @@ impl WGS84Point {
     pub fn in_epsg32619(&self) -> bool {
         -72.0 <= self.lon && self.lon <= -66.0 && 0.0 <= self.lat && self.lat <= 84.0
     }
+    pub fn to_utm_proj4(&self) -> String {
+        // Determine UTM zone from longitude
+        // Zone = floor((lon + 180) / 6) + 1
+        let zone = ((self.lon + 180.0) / 6.0).floor() as i32 + 1;
+
+        // Determine hemisphere
+        let south = if self.lat < 0.0 { " +south" } else { "" };
+
+        format!(
+            "+proj=utm +zone={} +datum=WGS84 +units=m +no_defs +type=crs{}",
+            zone, south
+        )
+    }
 }
 
 impl fmt::Display for WGS84Point {
@@ -80,6 +93,13 @@ pub struct WGS84BoundingBox {
 }
 
 impl WGS84BoundingBox {
+    pub fn center(&self) -> WGS84Point {
+        WGS84Point {
+            lon: 0.5 * (self.min.lon + self.max.lon),
+            lat: 0.5 * (self.min.lat + self.max.lat),
+            ele: None,
+        }
+    }
     pub fn from(p1: &WGS84Point, p2: &WGS84Point) -> Self {
         let min = WGS84Point {
             lon: p1.lon.min(p2.lon),

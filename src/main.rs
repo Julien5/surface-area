@@ -16,8 +16,10 @@ fn main() {
     kml_polygon.info();
     let pbbox = kml_polygon.wgsbbox();
     let mut gridpoints = BTreeSet::new();
+    let mut projections = BTreeSet::new();
     for dataset in Dataset::select(&kml_polygon.datasets()) {
         dataset.info();
+        projections.insert(dataset.projection());
         let dbbox = dataset.wgsbbox();
         if let Some(mut bbox) = pbbox.intersection(&dbbox) {
             log::trace!("bbox: {}", bbox);
@@ -29,11 +31,16 @@ fn main() {
             }
         }
     }
+    projections.insert(kml_polygon.projection());
+    if projections.len() != 1 {
+        log::error!("unsupported: polygon/datasets strech over multiple UTM zones");
+        for p in projections {
+            log::error!("{}", p);
+        }
+        return;
+    }
 
     log::trace!("gridpoints: {}", gridpoints.len());
-    for g in &gridpoints {
-        log::trace!("g: {}", g);
-    }
 
     let gridvec: Vec<MercatorPoint> = gridpoints.into_iter().collect();
     let gridtriangles = triangulation::grid::triangulate(&gridvec);
@@ -56,8 +63,8 @@ fn main() {
             log::info!("remove artifact with area {:.4}", a2d);
             continue;
         }
-        let rat = 100.0 * (a3d / a2d - 1.0);
-        log::trace!("plane area: {:6.2} {:6.2} +{:3.1}%", a3d, a2d, rat);
+        // let rat = 100.0 * (a3d / a2d - 1.0);
+        // log::trace!("plane area: {:6.2} {:6.2} +{:3.1}%", a3d, a2d, rat);
         ret += a3d;
         ret_flat += a2d;
         planes.push(plane.clone());
