@@ -69,7 +69,6 @@ pub mod grid {
 
         // Extract triangles
         let mut triangles = Vec::new();
-
         for face in triangulation.inner_faces() {
             let [v1, v2, v3] = face.vertices();
             let p1 = find_matching_point(
@@ -109,6 +108,7 @@ pub mod grid {
                 return point.clone();
             }
         }
+        assert!(false);
 
         // If no exact match found (shouldn't happen), create a new point without elevation
         MercatorPoint {
@@ -158,8 +158,8 @@ mod tests {
         for nx in 0..count {
             for ny in 0..count {
                 points.push(MercatorPoint {
-                    x: nx as f64 * step + next_random() * step / 5.0,
-                    y: ny as f64 * step + next_random() * step / 5.0,
+                    x: nx as f64 * step + next_random() * step / 2.0,
+                    y: ny as f64 * step + next_random() * step / 2.0,
                     ele: Some(next_random() * 100.0),
                 });
             }
@@ -254,7 +254,7 @@ mod tests {
 
     #[test]
     fn test_triangulate_random_grid() {
-        let points = generate_random_grid(5);
+        let points = generate_random_grid(20);
         let triangles = triangulate(&points);
         drawresult(&triangles, "/tmp/random-grid.svg");
     }

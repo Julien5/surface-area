@@ -32,6 +32,10 @@ fn main() {
     }
 
     log::trace!("gridpoints: {}", gridpoints.len());
+    for g in &gridpoints {
+        log::trace!("g: {}", g);
+    }
+
     let gridvec: Vec<MercatorPoint> = gridpoints.into_iter().collect();
     let gridtriangles = triangulation::grid::triangulate(&gridvec);
     log::trace!("grid triangles: {}", gridtriangles.len());
@@ -40,22 +44,28 @@ fn main() {
     let mut svg = svg::SVG::init(&kml_polygon.mercatorbbox());
     let colors = ["blue", "gray", "yellow", "green"];
     let mut planes = Vec::new();
+    let mut ret = 0f64;
+    let mut ret_flat = 0f64;
     for (i, gridtriangle) in gridtriangles.iter().enumerate() {
         let plane = intersection::intersection(&polygon, &gridtriangle);
         if plane.is_empty() {
             continue;
         }
+        let a2d = polygon::calculate_3d_surface_area(&polygon::flat(&plane));
+        let a3d = polygon::calculate_3d_surface_area(&plane);
+        if a2d < 0.001 {
+            log::info!("remove artifact with area {:.4}", a2d);
+            continue;
+        }
+        let rat = 100.0 * (a3d / a2d - 1.0);
+        log::trace!("plane area: {:6.2} {:6.2} +{:3.1}%", a3d, a2d, rat);
+        ret += a3d;
+        ret_flat += a2d;
         planes.push(plane.clone());
         svg.add_polygon(&plane, colors[i % colors.len()]);
     }
     log::trace!("planes: {}", planes.len());
 
-    let mut ret = 0f64;
-    let mut ret_flat = 0f64;
-    for p in planes {
-        ret += polygon::calculate_3d_surface_area(&p);
-        ret_flat += polygon::calculate_3d_surface_area(&polygon::flat(&p));
-    }
     println!(
         "geodesic: {:.1} (geo crate)",
         reference::geodesic_area(&kml_polygon.wgs)

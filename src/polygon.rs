@@ -1,4 +1,4 @@
-use std::collections::BTreeSet;
+use std::{collections::BTreeSet, env};
 
 use crate::{
     mercator::WebMercatorProjection,
@@ -73,20 +73,45 @@ impl Polygon {
         self.wgs.iter().map(|w| projection.project(&w)).collect()
     }
 
+    pub fn datasetstring(s: &String) -> String {
+        if s.contains(&"GL1") {
+            "/home/julien/DEM/SRTM/GL1/S2/output_SRTMGL1.tif".to_string()
+        } else if s.contains("HGT") {
+            "/home/julien/DEM/SRTM/GL3/hgt/N18W070.hgt".to_string()
+        } else {
+            String::new()
+        }
+    }
+
+    fn datasetsenv() -> Vec<String> {
+        match env::var("DATASETS") {
+            Ok(val) => return val.split(",").map(|s| s.to_string()).collect(),
+            Err(_) => {}
+        }
+        Vec::new()
+    }
+
     pub fn datasets(&self) -> BTreeSet<String> {
-        let mut ret = BTreeSet::new();
-        let gl1 = "/home/julien/DEM/SRTM/GL1/S2/output_SRTMGL1.tif".to_string();
-        /*let hgtdir = "/home/julien/DEM/SRTM/GL3/hgt";
-        let htg: BTreeSet<String> = self
-            .wgs
+        Self::datasetsenv()
             .iter()
-            .map(|w| format!("{}/{}", hgtdir, crate::hgt::hgt_basename(w)))
-            .collect();
-        for h in &htg {
-            ret.insert(h.clone());
-        }*/
-        ret.insert(gl1);
-        ret
+            .map(|s| Self::datasetstring(s))
+            .collect()
+        /*
+        let mut ret = BTreeSet::new();
+                        let hgtdir = "/home/julien/DEM/SRTM/GL3/hgt";
+                        let htg: BTreeSet<String> = self
+                            .wgs
+                            .iter()
+                            .map(|w| format!("{}/{}", hgtdir, crate::hgt::hgt_basename(w)))
+                            .collect();
+                        for h in &htg {
+                            ret.insert(h.clone());
+                        }
+
+                let gl1 = "/home/julien/DEM/SRTM/GL1/S2/output_SRTMGL1.tif".to_string();
+                ret.insert(gl1);
+                ret
+                */
     }
 }
 
