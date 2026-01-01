@@ -12,12 +12,12 @@ struct Cli {
 fn main() {
     env_logger::init();
     let args = Cli::parse();
-    let kml_polygon = read_kml::read_polyline(&args.path.as_str());
-    kml_polygon.info();
-    let pbbox = kml_polygon.wgsbbox();
+    let input_polygon = read_kml::read_polyline(&args.path.as_str());
+    input_polygon.info();
+    let pbbox = input_polygon.wgsbbox();
     let mut gridpoints = BTreeSet::new();
     let mut projections = BTreeSet::new();
-    for dataset in Dataset::select(&kml_polygon.datasets()) {
+    for dataset in Dataset::select(&input_polygon.datasets()) {
         dataset.info();
         projections.insert(dataset.projection());
         let dbbox = dataset.wgsbbox();
@@ -31,7 +31,7 @@ fn main() {
             }
         }
     }
-    projections.insert(kml_polygon.projection());
+    projections.insert(input_polygon.projection());
     if projections.len() != 1 {
         log::error!("unsupported: polygon/datasets strech over multiple UTM zones");
         for p in projections {
@@ -46,8 +46,8 @@ fn main() {
     let gridtriangles = triangulation::grid::triangulate(&gridvec);
     log::trace!("grid triangles: {}", gridtriangles.len());
 
-    let polygon = kml_polygon.mercator();
-    let mut svg = svg::SVG::init(&kml_polygon.mercatorbbox());
+    let polygon = input_polygon.mercator();
+    let mut svg = svg::SVG::init(&input_polygon.mercatorbbox());
     let colors = ["blue", "gray", "yellow", "green"];
     let mut planes = Vec::new();
     let mut ret = 0f64;
@@ -74,11 +74,11 @@ fn main() {
 
     println!(
         "geodesic: {:.1} (geo crate)",
-        reference::geodesic_area(&kml_polygon.wgs)
+        reference::geodesic_area(&input_polygon.wgs)
     );
     println!(
         "  planar: {:.1} (geo crate)",
-        reference::planar_area(&kml_polygon.mercator())
+        reference::planar_area(&input_polygon.mercator())
     );
     println!();
     println!("    flat: {:.1}", ret_flat);
@@ -88,7 +88,7 @@ fn main() {
     println!();
     println!(
         "estimate: {:.1}",
-        ratio * reference::geodesic_area(&kml_polygon.wgs)
+        ratio * reference::geodesic_area(&input_polygon.wgs)
     );
 
     //svg.add_polygon(&polygon, "none");
