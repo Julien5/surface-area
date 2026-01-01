@@ -8,3 +8,4 @@ pub mod read_polygon;
 pub mod reference;
 pub mod svg;
 pub mod triangulation;
+pub mod typst;
