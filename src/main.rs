@@ -38,7 +38,7 @@ fn process(input_polygon: &Polygon) {
         return;
     }
 
-    log::error!("using UTM projection: {}", projections.first().unwrap());
+    log::info!("using UTM projection: {}", projections.first().unwrap());
 
     log::trace!("gridpoints: {}", gridpoints.len());
 
