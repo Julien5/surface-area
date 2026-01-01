@@ -5,11 +5,6 @@ use surface_area::point::MercatorPoint;
 use surface_area::polygon::Polygon;
 use surface_area::{intersection, polygon, read_polygon, reference, svg, triangulation};
 
-#[derive(Parser)]
-struct Cli {
-    path: String,
-}
-
 fn process(input_polygon: &Polygon) {
     input_polygon.info();
     let pbbox = input_polygon.wgsbbox();
@@ -89,11 +84,18 @@ fn process(input_polygon: &Polygon) {
     std::fs::write("/tmp/triangles.svg", svg.render()).unwrap();
 }
 
+#[derive(Parser)]
+struct Cli {
+    paths: Vec<String>,
+}
+
 fn main() {
     env_logger::init();
     let args = Cli::parse();
-    let input_polygons = read_polygon::read_polyline(&args.path.as_str());
-    for p in input_polygons {
-        process(&p);
+    for path in &args.paths {
+        let input_polygons = read_polygon::read_polyline(&path);
+        for p in input_polygons {
+            process(&p);
+        }
     }
 }
