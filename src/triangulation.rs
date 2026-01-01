@@ -22,28 +22,33 @@ impl Triangle {
         ret.push(self.2.clone());
         ret
     }
+
     pub fn area(&self) -> f64 {
+        let n = self.normal_vector();
+
+        // 0.5 * magnitude of cross product
+        0.5 * (n.0 * n.0 + n.1 * n.1 + n.2 * n.2).sqrt()
+    }
+
+    fn normal_vector(&self) -> (f64, f64, f64) {
         let p1 = &self.0;
         let p2 = &self.1;
         let p3 = &self.2;
 
-        // Vector AB
-        let ax = p2.x - p1.x;
-        let ay = p2.y - p1.y;
-        let az = p2.ele.unwrap() - p1.ele.unwrap();
+        let e1 = p1.ele.unwrap();
+        let e2 = p2.ele.unwrap();
+        let e3 = p3.ele.unwrap();
 
-        // Vector AC
-        let bx = p3.x - p1.x;
-        let by = p3.y - p1.y;
-        let bz = p3.ele.unwrap() - p1.ele.unwrap();
+        // Two edge vectors
+        let v1 = (p2.x - p1.x, p2.y - p1.y, e2 - e1);
+        let v2 = (p3.x - p1.x, p3.y - p1.y, e3 - e1);
 
-        // Cross product components
-        let cx = ay * bz - az * by;
-        let cy = az * bx - ax * bz;
-        let cz = ax * by - ay * bx;
+        // Cross product: v1 × v2
+        let nx = v1.1 * v2.2 - v1.2 * v2.1;
+        let ny = v1.2 * v2.0 - v1.0 * v2.2;
+        let nz = v1.0 * v2.1 - v1.1 * v2.0;
 
-        // 0.5 * magnitude of cross product
-        0.5 * (cx * cx + cy * cy + cz * cz).sqrt()
+        (nx, ny, nz)
     }
 }
 

@@ -205,11 +205,11 @@ impl Dataset {
         let polybox = polygon.wgsbbox();
         datasets.retain(|dataset| {
             let databox = dataset.wgsbbox();
-            let ret = databox.contains_other(&polybox);
-            if !ret {
+            let ret = databox.intersection(&polybox);
+            if ret.is_none() {
                 log::trace!("discard {} (bbox)", dataset.filename);
             }
-            ret
+            ret.is_some()
         });
         datasets
     }
@@ -243,10 +243,10 @@ impl Dataset {
         // Clamp to valid raster bounds
         assert!(col_start >= 0);
         assert!(row_start >= 0);
-        assert!(col_end < self.raster.xsize as isize);
-        assert!(row_end < self.raster.ysize as isize);
-        let col_end = col_end.min(self.raster.xsize as isize);
-        let row_end = row_end.min(self.raster.ysize as isize);
+        //assert!(col_end < self.raster.xsize as isize);
+        //assert!(row_end < self.raster.ysize as isize);
+        let col_end = col_end.min((self.raster.xsize - 1) as isize);
+        let row_end = row_end.min((self.raster.ysize - 1) as isize);
         let projection = WebMercatorProjection::make(&self.projection);
         //log::info!("row: {row_start}..{row_end}");
         //log::info!("col: {col_start}..{col_end}");

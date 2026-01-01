@@ -17,26 +17,35 @@ impl SVG {
             polygons: Vec::new(),
         }
     }
-    pub fn add_triangles(&mut self, triangles: &Vec<Triangle>, altfill: bool) {
+    pub fn add_triangles_colors(&mut self, triangles: &Vec<Triangle>, colors: &Vec<String>) {
         // Add each triangle as a polygon
         for (i, triangle) in triangles.iter().enumerate() {
             let (x1, y1) = self.transform(triangle.0.x, triangle.0.y);
             let (x2, y2) = self.transform(triangle.1.x, triangle.1.y);
             let (x3, y3) = self.transform(triangle.2.x, triangle.2.y);
+            let p = format!(
+                r#"  <polygon points="{:.2},{:.2} {:.2},{:.2} {:.2},{:.2}" fill="{}" stroke="black" stroke-width="1"/>"#,
+                x1, y1, x2, y2, x3, y3, colors[i]
+            );
+
+            self.polygons.push(p);
+        }
+    }
+    pub fn add_triangles(&mut self, triangles: &Vec<Triangle>, altfill: bool) {
+        // Add each triangle as a polygon
+        let mut colors = Vec::with_capacity(triangles.len());
+        for i in 0..triangles.len() {
             let mut fill = "none";
             if altfill {
                 if i % 2 == 0 {
                     fill = "blue";
                 }
             }
-            let p = format!(
-                r#"  <polygon points="{:.2},{:.2} {:.2},{:.2} {:.2},{:.2}" fill="{}" stroke="black" stroke-width="1"/>"#,
-                x1, y1, x2, y2, x3, y3, fill
-            );
-
-            self.polygons.push(p);
+            colors.push(fill.to_string());
         }
+        self.add_triangles_colors(triangles, &colors);
     }
+
     pub fn add_polygon(&mut self, points: &Vec<MercatorPoint>, fill: &str) {
         // Add each triangle as a polygon
         let s = points
@@ -48,7 +57,7 @@ impl SVG {
             .collect::<Vec<String>>()
             .join(" ");
         let p = format!(
-            r#"<polygon points="{}" fill="{}" stroke="red" stroke-width="3"/>"#,
+            r#"<polygon points="{}" fill="{}" stroke="none" stroke-width="1"/>"#,
             s, fill
         );
         self.polygons.push(p);
@@ -82,4 +91,11 @@ impl SVG {
             500.0 - (y - self.mercator_bbox.min.y + self.height() * self.padding) * self.scale();
         (svg_x, svg_y)
     }
+}
+
+pub fn color_for_slope(percent: f64) -> String {
+    let max = 50f64;
+    let r = percent.abs().clamp(0f64, max);
+    let l = 100f64 * (max - r) / max;
+    format!("rgb({:.0}%, {:.0}%, {:.0}%)", l, l, l)
 }

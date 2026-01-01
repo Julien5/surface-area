@@ -9,12 +9,12 @@ function compute() {
 }
 
 function test() {
-	cargo test "$@"
+	cargo test -- --nocapture "$@"
 }
 
 function init() {
-	#export RUST_LOG=trace
-	export RUST_LOG=info
+	export RUST_LOG=trace
+	#export RUST_LOG=info
 	#export RUST_LOG=
 }
 

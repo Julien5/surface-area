@@ -36,11 +36,10 @@ fn process(input_polygon: &Polygon) {
 
     let polygon = input_polygon.mercator();
     let mut svg = svg::SVG::init(&input_polygon.mercatorbbox());
-    let colors = ["blue", "gray", "yellow", "green"];
     let mut planes = Vec::new();
     let mut ret = 0f64;
     let mut ret_flat = 0f64;
-    for (i, gridtriangle) in gridtriangles.iter().enumerate() {
+    for (_i, gridtriangle) in gridtriangles.iter().enumerate() {
         let plane = intersection::intersection(&polygon, &gridtriangle);
         if plane.is_empty() {
             continue;
@@ -56,7 +55,7 @@ fn process(input_polygon: &Polygon) {
         ret += a3d;
         ret_flat += a2d;
         planes.push(plane.clone());
-        svg.add_polygon(&plane, colors[i % colors.len()]);
+        svg.add_polygon(&plane, &svg::color_for_slope(polygon::slope(&plane)));
     }
     log::trace!("planes: {}", planes.len());
 
@@ -82,7 +81,7 @@ fn process(input_polygon: &Polygon) {
     //svg.add_polygon(&polygon, "none");
     //svg.add_triangles(&atoms, true);
     //svg.add_triangles(&triangulation::polygon::triangulate(&polygon), true);
-    svg.add_triangles(&gridtriangles, false);
+    //svg.add_triangles(&gridtriangles, false);
     std::fs::write("/tmp/triangles.svg", svg.render()).unwrap();
 }
 
