@@ -1,4 +1,4 @@
-use std::path::Path;
+use std::{collections::BTreeSet, path::Path};
 
 use crate::{
     mercator::WebMercatorProjection,
@@ -153,6 +153,50 @@ impl Dataset {
 }
 
 impl Dataset {
+    pub fn remove_redundant_datasets(datasets: &mut Vec<Dataset>) {
+        let mut indices_to_remove = Vec::new();
+
+        for (i1, dataset1) in datasets.iter().enumerate() {
+            let bbox1 = dataset1.wgsbbox();
+            for (i2, dataset2) in datasets.iter().enumerate() {
+                if i1 == i2 {
+                    continue;
+                }
+                let bbox2 = dataset2.wgsbbox();
+                // Check if dataset1 should be removed:
+                // - dataset1 has lower resolution
+                // - bbox1 is contained in bbox2
+                if dataset1.raster.xstep > dataset2.raster.xstep && bbox2.contains_other(&bbox1) {
+                    log::trace!(
+                        "discard {} (prefer {} instead)",
+                        dataset1.filename,
+                        dataset2.filename
+                    );
+                    indices_to_remove.push(i1);
+                    break; // No need to check other datasets for this one
+                }
+            }
+        }
+
+        // Remove duplicates and sort in descending order to remove from the end
+        indices_to_remove.sort_unstable();
+        indices_to_remove.dedup();
+
+        // Remove in reverse order to maintain correct indices
+        for &idx in indices_to_remove.iter().rev() {
+            datasets.remove(idx);
+        }
+    }
+
+    pub fn select(files: &BTreeSet<String>) -> Vec<Dataset> {
+        for filename in files {
+            log::trace!("found matching dataset: {}", filename);
+        }
+        let mut datasets: Vec<_> = files.iter().map(|file| Dataset::open(file)).collect();
+        Self::remove_redundant_datasets(&mut datasets);
+        datasets
+    }
+
     pub fn points_inside(&self, snapped_box: &WGS84BoundingBox) -> Vec<MercatorPoint> {
         let mut ret = Vec::new();
 
@@ -205,11 +249,11 @@ impl Dataset {
         for row in row_start..=row_end {
             for col in col_start..=col_end {
                 let mut wgs = self.raster.wgs84(col, row);
-                if !snapped_box.contains(&wgs) {
+                if !snapped_box.contains_point(&wgs) {
                     log::trace!("bbox:{}", snapped_box);
                     log::trace!("point:{}", wgs);
                 }
-                assert!(snapped_box.contains(&wgs));
+                assert!(snapped_box.contains_point(&wgs));
 
                 // Calculate buffer index
                 let buffer_col = (col - col_start) as usize;

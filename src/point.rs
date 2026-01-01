@@ -119,11 +119,18 @@ impl WGS84BoundingBox {
             None
         }
     }
-    pub fn contains(&self, w: &WGS84Point) -> bool {
+    pub fn contains_point(&self, w: &WGS84Point) -> bool {
         w.lon >= self.min.lon
             && w.lon <= self.max.lon
             && w.lat >= self.min.lat
             && w.lat <= self.max.lat
+    }
+
+    pub fn contains_other(&self, other: &Self) -> bool {
+        self.min.lon <= other.min.lon
+            && self.min.lat <= other.min.lat
+            && self.max.lon >= other.max.lon
+            && self.max.lat >= other.min.lat
     }
 }
 

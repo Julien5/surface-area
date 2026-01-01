@@ -16,8 +16,7 @@ fn main() {
     kml_polygon.info();
     let pbbox = kml_polygon.wgsbbox();
     let mut gridpoints = BTreeSet::new();
-    for b in kml_polygon.datasets() {
-        let dataset = Dataset::open(&b);
+    for dataset in Dataset::select(&kml_polygon.datasets()) {
         dataset.info();
         let dbbox = dataset.wgsbbox();
         if let Some(mut bbox) = pbbox.intersection(&dbbox) {
