@@ -12,6 +12,7 @@ pub struct Polygon {
 impl Polygon {
     pub fn info(&self) {
         log::info!("polygon: len: {}", self.wgs.len());
+        log::info!("polygon: projection: {}", self.projection());
         log::info!("polygon: wgs bbox: {}", self.wgsbbox());
         log::info!("polygon: mercator bbox: {}", self.mercatorbbox());
         log::info!("polygon: width: {:.1}", self.mercatorbbox().width());

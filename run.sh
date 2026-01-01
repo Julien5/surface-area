@@ -14,7 +14,8 @@ function test() {
 
 function init() {
 	#export RUST_LOG=trace
-	export RUST_LOG=
+	export RUST_LOG=info
+	#export RUST_LOG=
 }
 
 function main() {

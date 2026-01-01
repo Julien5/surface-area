@@ -8,6 +8,7 @@ pub struct WebMercatorProjection {
 
 impl WebMercatorProjection {
     pub fn make(dst_spec: &str) -> WebMercatorProjection {
+        assert!(!dst_spec.is_empty());
         use proj4rs::proj::Proj;
         let dst = Proj::from_proj_string(dst_spec).unwrap();
         let wgs84_spec = "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs";

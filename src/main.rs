@@ -14,10 +14,8 @@ fn process(input_polygon: &Polygon) {
     input_polygon.info();
     let pbbox = input_polygon.wgsbbox();
     let mut gridpoints = BTreeSet::new();
-    let mut projections = BTreeSet::new();
     for dataset in Dataset::select(&input_polygon) {
         dataset.info();
-        projections.insert(dataset.projection());
         let dbbox = dataset.wgsbbox();
         if let Some(mut bbox) = pbbox.intersection(&dbbox) {
             log::trace!("bbox: {}", bbox);
@@ -29,16 +27,6 @@ fn process(input_polygon: &Polygon) {
             }
         }
     }
-    projections.insert(input_polygon.projection());
-    if projections.len() != 1 {
-        log::error!("unsupported: polygon/datasets strech over multiple UTM zones");
-        for p in projections {
-            log::error!("{}", p);
-        }
-        return;
-    }
-
-    log::info!("using UTM projection: {}", projections.first().unwrap());
 
     log::trace!("gridpoints: {}", gridpoints.len());
 

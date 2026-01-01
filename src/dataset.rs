@@ -68,10 +68,11 @@ pub struct Dataset {
     pub filename: String,
     g: gdal::Dataset,
     raster: Raster,
+    projection: String,
 }
 
 impl Dataset {
-    pub fn open(filename: &String) -> Self {
+    pub fn open(filename: &String, projection: &String) -> Self {
         let path = Path::new(filename.as_str());
         let g = gdal::Dataset::open(path).unwrap();
         let transform = Raster::make(&g);
@@ -79,10 +80,12 @@ impl Dataset {
             filename: filename.clone(),
             g,
             raster: transform,
+            projection: projection.clone(),
         }
     }
     pub fn info(&self) {
         log::info!("dataset: {}", self.filename);
+        log::info!("dataset: {}", self.projection);
         log::info!("dataset: xsize {}", self.raster.xsize);
         log::info!("dataset: ysize {}", self.raster.ysize);
         log::info!("dataset: xstep {:.5}", self.raster.xstep);
@@ -92,9 +95,6 @@ impl Dataset {
         log::info!("dataset: width: {:.1}", self.mercatorbbox().width());
         log::info!("dataset: height: {:.1}", self.mercatorbbox().height());
         log::info!("dataset: area: {:.1}", self.mercatorbbox().area());
-    }
-    pub fn projection(&self) -> String {
-        return self.wgsbbox().center().to_utm_proj4();
     }
     pub fn wgsbbox(&self) -> WGS84BoundingBox {
         let (width, height) = self.g.raster_size();
@@ -148,7 +148,7 @@ impl Dataset {
         b.max = ret.max;
     }
     pub fn mercatorbbox(&self) -> MercatorBoundingBox {
-        let projection = WebMercatorProjection::make(&self.projection());
+        let projection = WebMercatorProjection::make(&self.projection);
         let wgs = self.wgsbbox();
         let min = projection.project(&wgs.min);
         let max = projection.project(&wgs.max);
@@ -197,7 +197,10 @@ impl Dataset {
         for filename in &candidates {
             log::trace!("found candidate: {}", filename);
         }
-        let mut datasets: Vec<_> = candidates.iter().map(|file| Dataset::open(file)).collect();
+        let mut datasets: Vec<_> = candidates
+            .iter()
+            .map(|file| Dataset::open(file, &polygon.projection()))
+            .collect();
         Self::remove_redundant_datasets(&mut datasets);
         let polybox = polygon.wgsbbox();
         datasets.retain(|dataset| {
@@ -244,7 +247,7 @@ impl Dataset {
         assert!(row_end < self.raster.ysize as isize);
         let col_end = col_end.min(self.raster.xsize as isize);
         let row_end = row_end.min(self.raster.ysize as isize);
-        let projection = WebMercatorProjection::make(&self.projection());
+        let projection = WebMercatorProjection::make(&self.projection);
         //log::info!("row: {row_start}..{row_end}");
         //log::info!("col: {col_start}..{col_end}");
 
