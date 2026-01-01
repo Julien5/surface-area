@@ -158,18 +158,17 @@ mod dataset {
         }
 
         // Recursively search for .tif files in gl1_dir
-        /*
-                let gl1_dir = "/home/julien/DEM/SRTM/GL1";
-                for entry in walkdir::WalkDir::new(gl1_dir)
-                    .into_iter()
-                    .filter_map(Result::ok)
-                {
-                    let path = entry.path();
-                    if path.extension().and_then(|ext| ext.to_str()) == Some("tif") {
-                        ret.insert(path.to_string_lossy().into_owned());
-                    }
-                }
-        */
+        let gl1_dir = "/home/julien/DEM/SRTM/GL1";
+        for entry in walkdir::WalkDir::new(gl1_dir)
+            .into_iter()
+            .filter_map(Result::ok)
+        {
+            let path = entry.path();
+            if path.extension().and_then(|ext| ext.to_str()) == Some("tif") {
+                ret.insert(path.to_string_lossy().into_owned());
+            }
+        }
+
         ret
     }
 }

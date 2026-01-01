@@ -157,60 +157,41 @@ impl Dataset {
 }
 
 impl Dataset {
-    pub fn remove_redundant_datasets(datasets: &mut Vec<Dataset>) {
-        let mut indices_to_remove = Vec::new();
-
-        for (i1, dataset1) in datasets.iter().enumerate() {
-            let bbox1 = dataset1.wgsbbox();
-            for (i2, dataset2) in datasets.iter().enumerate() {
-                if i1 == i2 {
-                    continue;
-                }
-                let bbox2 = dataset2.wgsbbox();
-                // Check if dataset1 should be removed:
-                // - dataset1 has lower resolution
-                // - bbox1 is contained in bbox2
-                if dataset1.raster.xstep > dataset2.raster.xstep && bbox2.contains_other(&bbox1) {
-                    log::trace!(
-                        "discard {} (prefer {} instead)",
-                        dataset1.filename,
-                        dataset2.filename
-                    );
-                    indices_to_remove.push(i1);
-                    break; // No need to check other datasets for this one
-                }
-            }
-        }
-
-        // Remove duplicates and sort in descending order to remove from the end
-        indices_to_remove.sort_unstable();
-        indices_to_remove.dedup();
-
-        // Remove in reverse order to maintain correct indices
-        for &idx in indices_to_remove.iter().rev() {
-            datasets.remove(idx);
-        }
-    }
-
     pub fn select(polygon: &Polygon) -> Vec<Dataset> {
         let candidates = polygon.candidates();
         for filename in &candidates {
             log::trace!("found candidate: {}", filename);
         }
+
+        let polybox = polygon.wgsbbox();
+        // try to find a high res data set (GL1) => then a single one
+        {
+            let mut high_res: Vec<_> = candidates
+                .iter()
+                .map(|filename| Dataset::open(&filename, &polygon.projection()))
+                .collect();
+            high_res
+                .retain(|d| d.wgsbbox().contains_other(&polybox) && d.filename.contains("/GL1/"));
+            if !high_res.is_empty() {
+                high_res.truncate(1);
+                return high_res;
+            }
+        }
+
+        // fall back: multiple GL3 tiles
         let mut datasets: Vec<_> = candidates
             .iter()
             .map(|file| Dataset::open(file, &polygon.projection()))
             .collect();
-        Self::remove_redundant_datasets(&mut datasets);
-        let polybox = polygon.wgsbbox();
         datasets.retain(|dataset| {
             let databox = dataset.wgsbbox();
-            let ret = databox.intersection(&polybox);
-            if ret.is_none() {
+            let intersection = databox.intersection(&polybox);
+            if intersection.is_none() {
                 log::trace!("discard {} (bbox)", dataset.filename);
             }
-            ret.is_some()
+            intersection.is_some() && dataset.filename.contains("/GL3/")
         });
+
         datasets
     }
 
@@ -243,8 +224,6 @@ impl Dataset {
         // Clamp to valid raster bounds
         assert!(col_start >= 0);
         assert!(row_start >= 0);
-        //assert!(col_end < self.raster.xsize as isize);
-        //assert!(row_end < self.raster.ysize as isize);
         let col_end = col_end.min((self.raster.xsize - 1) as isize);
         let row_end = row_end.min((self.raster.ysize - 1) as isize);
         let projection = WebMercatorProjection::make(&self.projection);
