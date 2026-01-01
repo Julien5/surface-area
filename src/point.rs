@@ -176,6 +176,22 @@ impl MercatorBoundingBox {
     pub fn area(&self) -> f64 {
         self.width() * self.height()
     }
+    pub fn as_vector(&self) -> Vec<MercatorPoint> {
+        vec![
+            self.min.clone(),
+            MercatorPoint {
+                x: self.min.x,
+                y: self.max.y,
+                ele: None,
+            },
+            self.max.clone(),
+            MercatorPoint {
+                x: self.max.x,
+                y: self.min.y,
+                ele: None,
+            },
+        ]
+    }
 }
 impl fmt::Display for MercatorBoundingBox {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {

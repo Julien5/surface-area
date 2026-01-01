@@ -64,9 +64,19 @@ impl SVG {
     }
     pub fn render(&self) -> String {
         // Build SVG string
-        let mut svg =
-            String::from(r#"<svg width="500" height="500" xmlns="http://www.w3.org/2000/svg">"#);
+        let mut svg = format!(
+            r#"<svg width="500" height="{}" xmlns="http://www.w3.org/2000/svg">"#,
+            self.svg_height()
+        );
         svg.push('\n');
+        let frame = format!(
+            r#"<polygon points="0,0 {},0 {},{} 0,{} 0,0" fill="none" stroke="black" stroke-width="1"/>"#,
+            self.svg_width(),
+            self.svg_width(),
+            self.svg_height(),
+            self.svg_height()
+        );
+        svg.push_str(&frame);
         for p in &self.polygons {
             svg.push_str(&p.clone());
             svg.push('\n');
@@ -80,15 +90,21 @@ impl SVG {
     pub fn height(&self) -> f64 {
         self.mercator_bbox.max.y - self.mercator_bbox.min.y
     }
+    pub fn svg_width(&self) -> f64 {
+        500.0
+    }
+    pub fn svg_height(&self) -> f64 {
+        self.svg_width() * self.height() / self.width()
+    }
     pub fn scale(&self) -> f64 {
         let padded_width = self.width() * (1.0 + 2.0 * self.padding);
         let padded_height = self.height() * (1.0 + 2.0 * self.padding);
-        500.0 / padded_width.max(padded_height)
+        (self.svg_width() / padded_width).min(self.svg_height() / padded_height)
     }
     fn transform(&self, x: f64, y: f64) -> (f64, f64) {
         let svg_x = (x - self.mercator_bbox.min.x + self.width() * self.padding) * self.scale();
-        let svg_y =
-            500.0 - (y - self.mercator_bbox.min.y + self.height() * self.padding) * self.scale();
+        let svg_y = self.svg_height()
+            - (y - self.mercator_bbox.min.y + self.height() * self.padding) * self.scale();
         (svg_x, svg_y)
     }
 }
@@ -96,6 +112,6 @@ impl SVG {
 pub fn color_for_slope(percent: f64) -> String {
     let max = 50f64;
     let r = percent.abs().clamp(0f64, max);
-    let l = 100f64 * (max - r) / max;
+    let l = (100f64 * (max - r) / max).clamp(0f64, 75f64);
     format!("rgb({:.0}%, {:.0}%, {:.0}%)", l, l, l)
 }

@@ -35,7 +35,10 @@ fn process(input_polygon: &Polygon) {
     log::trace!("grid triangles: {}", gridtriangles.len());
 
     let polygon = input_polygon.mercator();
+
     let mut svg = svg::SVG::init(&input_polygon.mercatorbbox());
+    //svg.add_polygon(&input_polygon.mercatorbbox().as_vector(), "gray");
+    svg.add_polygon(&polygon, "gray");
     let mut planes = Vec::new();
     let mut ret = 0f64;
     let mut ret_flat = 0f64;
@@ -57,6 +60,7 @@ fn process(input_polygon: &Polygon) {
         planes.push(plane.clone());
         svg.add_polygon(&plane, &svg::color_for_slope(polygon::slope(&plane)));
     }
+
     log::trace!("planes: {}", planes.len());
 
     println!(
