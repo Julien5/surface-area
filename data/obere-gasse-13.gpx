@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- track-length = 228 filtered ascend = 0 plain-ascend = 0 cost=0 energy=0.0kwh time=22.47705680792974s -->
+<gpx 
+ xmlns="http://www.topografix.com/GPX/1/1" 
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+ xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd" 
+ version="1.1" 
+ creator="bikerouter.de 2025.84">
+ <trk>
+  <name>obere-gasse-13</name>
+  <link href="https://bikerouter.de/#map=19/48.00629/9.73939/standard&amp;lonlats=9.73994,48.006163;9.739313,48.006303;9.738964,48.006419;9.738763,48.006116;9.739214,48.006026;9.739763,48.005892;9.739868,48.006021;9.73993,48.006139&amp;straight=0,1,2,3,4,5,6">
+   <text>bikerouter.de</text>
+  </link>
+  <trkseg>
+   <trkpt lat="48.006162775630884" lon="9.739940464496614"/>
+   <trkpt lat="48.00630269052707" lon="9.73931282758713"/>
+   <trkpt lat="48.006419133443586" lon="9.738964140415193"/>
+   <trkpt lat="48.00611592142837" lon="9.738762974739076"/>
+   <trkpt lat="48.00602621338988" lon="9.739213585853578"/>
+   <trkpt lat="48.00589165103957" lon="9.739763438701631"/>
+   <trkpt lat="48.006020830902614" lon="9.739868044853212"/>
+   <trkpt lat="48.00613924549286" lon="9.739929735660555"/>
+  </trkseg>
+ </trk>
+</gpx>

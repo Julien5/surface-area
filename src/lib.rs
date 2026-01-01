@@ -4,7 +4,7 @@ pub mod intersection;
 pub mod mercator;
 pub mod point;
 pub mod polygon;
-pub mod read_kml;
+pub mod read_polygon;
 pub mod reference;
 pub mod svg;
 pub mod triangulation;

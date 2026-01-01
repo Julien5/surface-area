@@ -2,22 +2,20 @@ use clap::Parser;
 use std::collections::BTreeSet;
 use surface_area::dataset::Dataset;
 use surface_area::point::MercatorPoint;
-use surface_area::{intersection, polygon, read_kml, reference, svg, triangulation};
+use surface_area::polygon::Polygon;
+use surface_area::{intersection, polygon, read_polygon, reference, svg, triangulation};
 
 #[derive(Parser)]
 struct Cli {
     path: String,
 }
 
-fn main() {
-    env_logger::init();
-    let args = Cli::parse();
-    let input_polygon = read_kml::read_polyline(&args.path.as_str());
+fn process(input_polygon: &Polygon) {
     input_polygon.info();
     let pbbox = input_polygon.wgsbbox();
     let mut gridpoints = BTreeSet::new();
     let mut projections = BTreeSet::new();
-    for dataset in Dataset::select(&input_polygon.datasets()) {
+    for dataset in Dataset::select(&input_polygon) {
         dataset.info();
         projections.insert(dataset.projection());
         let dbbox = dataset.wgsbbox();
@@ -39,6 +37,8 @@ fn main() {
         }
         return;
     }
+
+    log::error!("using UTM projection: {}", projections.first().unwrap());
 
     log::trace!("gridpoints: {}", gridpoints.len());
 
@@ -96,4 +96,13 @@ fn main() {
     //svg.add_triangles(&triangulation::polygon::triangulate(&polygon), true);
     svg.add_triangles(&gridtriangles, false);
     std::fs::write("/tmp/triangles.svg", svg.render()).unwrap();
+}
+
+fn main() {
+    env_logger::init();
+    let args = Cli::parse();
+    let input_polygons = read_polygon::read_polyline(&args.path.as_str());
+    for p in input_polygons {
+        process(&p);
+    }
 }

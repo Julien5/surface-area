@@ -1,8 +1,9 @@
-use std::{collections::BTreeSet, path::Path};
+use std::path::Path;
 
 use crate::{
     mercator::WebMercatorProjection,
     point::{MercatorBoundingBox, MercatorPoint, WGS84BoundingBox, WGS84Point},
+    polygon::Polygon,
 };
 
 pub struct Raster {
@@ -191,12 +192,22 @@ impl Dataset {
         }
     }
 
-    pub fn select(files: &BTreeSet<String>) -> Vec<Dataset> {
-        for filename in files {
-            log::trace!("found matching dataset: {}", filename);
+    pub fn select(polygon: &Polygon) -> Vec<Dataset> {
+        let candidates = polygon.candidates();
+        for filename in &candidates {
+            log::trace!("found candidate: {}", filename);
         }
-        let mut datasets: Vec<_> = files.iter().map(|file| Dataset::open(file)).collect();
+        let mut datasets: Vec<_> = candidates.iter().map(|file| Dataset::open(file)).collect();
         Self::remove_redundant_datasets(&mut datasets);
+        let polybox = polygon.wgsbbox();
+        datasets.retain(|dataset| {
+            let databox = dataset.wgsbbox();
+            let ret = databox.contains_other(&polybox);
+            if !ret {
+                log::trace!("discard {} (bbox)", dataset.filename);
+            }
+            ret
+        });
         datasets
     }
 

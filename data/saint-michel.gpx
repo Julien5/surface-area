@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- track-length = 179 filtered ascend = 0 plain-ascend = 0 cost=0 energy=0.0kwh time=17.401768988684005s -->
+<gpx 
+ xmlns="http://www.topografix.com/GPX/1/1" 
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+ xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd" 
+ version="1.1" 
+ creator="bikerouter.de 2025.84">
+ <trk>
+  <name>saint-michel</name>
+  <link href="https://bikerouter.de/#map=19/45.35279/5.91635/standard&amp;lonlats=5.916596,45.352946;5.916411,45.35301;5.916293,45.35323;5.915942,45.35298;5.915947,45.352756;5.916197,45.352686;5.916285,45.352641;5.916572,45.352927&amp;straight=0,1,2,3,4,5,6">
+   <text>bikerouter.de</text>
+  </link>
+  <trkseg>
+   <trkpt lat="45.352946048751974" lon="5.9165963530540475"/>
+   <trkpt lat="45.353010108138065" lon="5.916411280632019"/>
+   <trkpt lat="45.353230451119316" lon="5.916293263435365"/>
+   <trkpt lat="45.3529798141304" lon="5.915941894054414"/>
+   <trkpt lat="45.352755559041576" lon="5.9159472584724435"/>
+   <trkpt lat="45.35268583248829" lon="5.916196703910828"/>
+   <trkpt lat="45.35264060440784" lon="5.91628521680832"/>
+   <trkpt lat="45.3529270483071" lon="5.9165722131729135"/>
+  </trkseg>
+ </trk>
+</gpx>

@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- track-length = 191 filtered ascend = 0 plain-ascend = 0 cost=0 energy=0.0kwh time=18.82367825755593s -->
+<gpx 
+ xmlns="http://www.topografix.com/GPX/1/1" 
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+ xsi:schemaLocation="http://www.topografix.com/GPX/1/1 http://www.topografix.com/GPX/1/1/gpx.xsd" 
+ version="1.1" 
+ creator="bikerouter.de 2025.84">
+ <trk>
+  <name>juigne</name>
+  <link href="https://bikerouter.de/#map=19/47.40554/-0.47270/standard&amp;lonlats=-0.47323,47.405725;-0.473445,47.405479;-0.473195,47.405369;-0.473252,47.405204;-0.473029,47.40513;-0.472664,47.405509;-0.47319,47.405731&amp;straight=0,1,2,3,4,5">
+   <text>bikerouter.de</text>
+  </link>
+  <trkseg>
+   <trkpt lat="47.405725310755685" lon="-0.4732301831245423"/>
+   <trkpt lat="47.40547852916762" lon="-0.47344475984573364"/>
+   <trkpt lat="47.405369437006364" lon="-0.4731953144073487"/>
+   <trkpt lat="47.405204275635334" lon="-0.47325164079666143"/>
+   <trkpt lat="47.405129862101134" lon="-0.47302901744842535"/>
+   <trkpt lat="47.405509188531255" lon="-0.47266423702239996"/>
+   <trkpt lat="47.405730612266076" lon="-0.4731899499893189"/>
+  </trkseg>
+ </trk>
+</gpx>

@@ -18,12 +18,12 @@ impl Polygon {
         log::info!("polygon: height: {:.1}", self.mercatorbbox().height());
         log::info!("polygon: area: {:.1}", self.mercatorbbox().area());
         let d = self
-            .datasets()
+            .candidates()
             .iter()
             .cloned()
             .collect::<Vec<String>>()
             .join(", ");
-        log::info!("polygon: datasets: {}", d);
+        log::info!("polygon: candidates: {}", d);
     }
 
     pub fn wgsbbox(&self) -> WGS84BoundingBox {
@@ -77,8 +77,8 @@ impl Polygon {
         let proj = WebMercatorProjection::make(&self.projection());
         self.wgs.iter().map(|w| proj.project(&w)).collect()
     }
-    pub fn datasets(&self) -> BTreeSet<String> {
-        return dataset::datasets(&self);
+    pub fn candidates(&self) -> BTreeSet<String> {
+        return dataset::candidates(&self);
     }
 }
 
@@ -138,7 +138,7 @@ mod dataset {
         Vec::new()
     }
 
-    pub fn datasets(polygon: &Polygon) -> BTreeSet<String> {
+    pub fn candidates(polygon: &Polygon) -> BTreeSet<String> {
         let ret1: BTreeSet<String> = datasetsenv().iter().map(|s| datasetstring(s)).collect();
         if !ret1.is_empty() {
             return ret1;
@@ -155,8 +155,18 @@ mod dataset {
             ret.insert(h.clone());
         }
 
-        ret.insert("/home/julien/DEM/SRTM/GL1/S1/output_SRTMGL1.tif".to_string());
-        ret.insert("/home/julien/DEM/SRTM/GL1/S2/output_SRTMGL1.tif".to_string());
+        // Recursively search for .tif files in gl1_dir
+        let gl1_dir = "/home/julien/DEM/SRTM/GL1";
+        for entry in walkdir::WalkDir::new(gl1_dir)
+            .into_iter()
+            .filter_map(Result::ok)
+        {
+            let path = entry.path();
+            if path.extension().and_then(|ext| ext.to_str()) == Some("tif") {
+                ret.insert(path.to_string_lossy().into_owned());
+            }
+        }
+
         ret
     }
 }
