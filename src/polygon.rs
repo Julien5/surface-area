@@ -1,4 +1,4 @@
-use std::{collections::BTreeSet, env};
+use std::collections::BTreeSet;
 
 use crate::{
     mercator::WebMercatorProjection,
@@ -72,46 +72,8 @@ impl Polygon {
         let projection = WebMercatorProjection::make();
         self.wgs.iter().map(|w| projection.project(&w)).collect()
     }
-
-    pub fn datasetstring(s: &String) -> String {
-        if s.contains(&"GL1") {
-            "/home/julien/DEM/SRTM/GL1/S2/output_SRTMGL1.tif".to_string()
-        } else if s.contains("HGT") {
-            "/home/julien/DEM/SRTM/GL3/hgt/N18W070.hgt".to_string()
-        } else {
-            String::new()
-        }
-    }
-
-    fn datasetsenv() -> Vec<String> {
-        match env::var("DATASETS") {
-            Ok(val) => return val.split(",").map(|s| s.to_string()).collect(),
-            Err(_) => {}
-        }
-        Vec::new()
-    }
-
     pub fn datasets(&self) -> BTreeSet<String> {
-        Self::datasetsenv()
-            .iter()
-            .map(|s| Self::datasetstring(s))
-            .collect()
-        /*
-        let mut ret = BTreeSet::new();
-                        let hgtdir = "/home/julien/DEM/SRTM/GL3/hgt";
-                        let htg: BTreeSet<String> = self
-                            .wgs
-                            .iter()
-                            .map(|w| format!("{}/{}", hgtdir, crate::hgt::hgt_basename(w)))
-                            .collect();
-                        for h in &htg {
-                            ret.insert(h.clone());
-                        }
-
-                let gl1 = "/home/julien/DEM/SRTM/GL1/S2/output_SRTMGL1.tif".to_string();
-                ret.insert(gl1);
-                ret
-                */
+        return dataset::datasets(&self);
     }
 }
 
@@ -146,4 +108,50 @@ pub fn calculate_3d_surface_area(polygon: &Vec<MercatorPoint>) -> f64 {
     let magnitude = (total_vec_x.powi(2) + total_vec_y.powi(2) + total_vec_z.powi(2)).sqrt();
 
     magnitude / 2.0
+}
+
+mod dataset {
+    use super::Polygon;
+    use std::collections::BTreeSet;
+    use std::env;
+
+    pub fn datasetstring(s: &String) -> String {
+        if s.contains(&"GL1") {
+            "/home/julien/DEM/SRTM/GL1/S2/output_SRTMGL1.tif".to_string()
+        } else if s.contains("HGT") {
+            "/home/julien/DEM/SRTM/GL3/hgt/N18W070.hgt".to_string()
+        } else {
+            String::new()
+        }
+    }
+
+    fn datasetsenv() -> Vec<String> {
+        match env::var("DATASETS") {
+            Ok(val) => return val.split(",").map(|s| s.to_string()).collect(),
+            Err(_) => {}
+        }
+        Vec::new()
+    }
+
+    pub fn datasets(polygon: &Polygon) -> BTreeSet<String> {
+        let ret1: BTreeSet<String> = datasetsenv().iter().map(|s| datasetstring(s)).collect();
+        if !ret1.is_empty() {
+            return ret1;
+        }
+
+        let mut ret = BTreeSet::new();
+        let hgtdir = "/home/julien/DEM/SRTM/GL3/hgt";
+        let htg: BTreeSet<String> = polygon
+            .wgs
+            .iter()
+            .map(|w| format!("{}/{}", hgtdir, crate::hgt::hgt_basename(w)))
+            .collect();
+        for h in &htg {
+            ret.insert(h.clone());
+        }
+
+        let gl1 = "/home/julien/DEM/SRTM/GL1/S2/output_SRTMGL1.tif".to_string();
+        ret.insert(gl1);
+        ret
+    }
 }
