@@ -16,9 +16,10 @@ pub fn make_typst_document(data: &Vec<Data>) -> String {
     for item in data {
         let ratio = item.geodesic3d / item.geodesic2d - 1f64;
         // 1. Main line with name in bold
-        doc.push_str(&format!("== * {} *\n\n", item.name));
+        let name = item.name.clone().replace("_", "\\_");
+        doc.push_str(&format!("== #strong[{}]\n\n", name));
 
-        doc.push_str(&format!("== * ratio: +{:.2}% * \n", 100f64 * ratio));
+        doc.push_str(&format!("== #strong[ratio: +{:.2}%]\n", 100f64 * ratio));
 
         doc.push_str("#table(\n");
         doc.push_str("  columns: (1fr, 1fr, 1fr),\n");
@@ -39,7 +40,7 @@ pub fn make_typst_document(data: &Vec<Data>) -> String {
         // We use triple backticks ``` to wrap the SVG content safely
         doc.push_str("#align(center, image(\n");
         doc.push_str(&format!("  bytes(```{}```.text),\n", item.svg));
-        doc.push_str("  width: 80%\n");
+        doc.push_str("  height: 15cm\n");
         doc.push_str("))\n\n");
 
         doc.push_str("#pagebreak()\n\n");
